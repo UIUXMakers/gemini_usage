@@ -322,9 +322,8 @@ def send_message_with_retry(
 
 # api_key, model = load_config()
 
-api_key = "AQ.Ab8RN6KaU4ux4n_HJjcsj-eH1xz1TsHArj4UcDY7DL_a0S5AjA"
-
-model = "gemini-3.5-flash-lite"
+api_key = st.secrets["gemini_api_key"]
+model = st.secrets["model"]
 
 
 if "history" not in st.session_state:
