@@ -13,7 +13,7 @@ USAGE_FILE = Path("gemini_usage_history.json")
 
 MAX_RETRIES = 5
 INITIAL_RETRY_DELAY = 2
-USD_TO_INR = 95.13
+USD_TO_INR = 95.56
 
 PRICING = {
     "gemini-3.8-flash": {
@@ -257,7 +257,8 @@ def create_chat(
 
 def send_message_with_retry(
     chat,
-    prompt
+    prompt,
+    uploaded_file=None
 ):
 
     last_error = None
@@ -268,9 +269,19 @@ def send_message_with_retry(
 
         try:
 
-            response = chat.send_message(
-                prompt
-            )
+            if uploaded_file is not None:
+                image_part = types.Part.from_bytes(
+                    data=uploaded_file.getvalue(),
+                    mime_type=uploaded_file.type or "application/octet-stream"
+                )
+
+                response = chat.send_message(
+                    [prompt, image_part]
+                )
+            else:
+                response = chat.send_message(
+                    prompt
+                )
 
             return response
 
@@ -407,6 +418,11 @@ with left:
             message["role"]
         ):
 
+            if message.get("image_name"):
+                st.caption(
+                    f"Image: {message['image_name']}"
+                )
+
             st.markdown(
                 message["content"]
             )
@@ -482,7 +498,8 @@ with left:
                     response = (
                         send_message_with_retry(
                             st.session_state.chat,
-                            prompt
+                            prompt,
+                            uploaded_file
                         )
                     )
 
@@ -608,6 +625,9 @@ with left:
 
                     "request":
                         prompt,
+
+                    "image_name":
+                        image_name,
 
                     "response":
                         answer,
