@@ -460,30 +460,58 @@ with left:
                     f"{total_tokens:,}"
                 )
 
-
+    uploaded_file = st.file_uploader(
+        "Upload an image for Gemini",
+        type=[
+            "jpg",
+            "jpeg",
+            "png",
+            "webp",
+            "heic",
+            "heif"
+        ],
+        key="image_uploader"
+    )
+    
     prompt = st.chat_input(
         "Send a message to Gemini"
     )
-
-
-    if prompt:
+    
+    analyze_image = st.button(
+        "Analyze Uploaded Image",
+        disabled=uploaded_file is None
+    )
+    
+    if prompt or analyze_image:
+    
+        if not prompt:
+            prompt = "Please analyze this image and explain what you find."
 
         st.session_state.messages.append(
             {
                 "role": "user",
-                "content": prompt
+                "content": prompt,
+                "image_name": (
+                    uploaded_file.name
+                    if uploaded_file is not None
+                    else None
+                )
             }
         )
-
 
         with st.chat_message(
             "user"
         ):
+            if uploaded_file is not None:
+                st.image(
+                    uploaded_file,
+                    caption=uploaded_file.name,
+                    width=300
+                )
 
             st.markdown(
                 prompt
-            )
-
+            )    
 
         with st.chat_message(
             "assistant"
@@ -608,7 +636,11 @@ with left:
                         st.session_state.history
                     ) + 1
                 )
-
+                image_name = (
+                    uploaded_file.name
+                    if uploaded_file is not None
+                    else None
+                )
 
                 record = {
 
